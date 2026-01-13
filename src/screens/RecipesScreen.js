@@ -1,8 +1,9 @@
 import React, { useState, useContext } from 'react';
-import { 
-  StyleSheet, Text, View, FlatList, Image, TouchableOpacity, 
-  SafeAreaView, StatusBar, Platform, Modal, ScrollView, ActivityIndicator, Alert 
+import {
+  StyleSheet, Text, View, FlatList, Image, TouchableOpacity,
+  StatusBar, Platform, Modal, ScrollView, ActivityIndicator, Alert
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import COLORS from '../constants/colors';
 import { FavoritesContext } from '../context/FavoritesContext';
@@ -127,7 +128,7 @@ export default function RecipesScreen() {
 
   return (
     <View style={styles.mainContainer}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.primaryGreen} />
+      <StatusBar barStyle="light-content" backgroundColor="#121212" />
       
       {/* HEADER */}
       <View style={styles.headerContainer}>
@@ -211,23 +212,23 @@ export default function RecipesScreen() {
 }
 
 const styles = StyleSheet.create({
-  mainContainer: { flex: 1, backgroundColor: COLORS.backgroundBg },
-  headerContainer: { backgroundColor: COLORS.primaryGreen, paddingBottom: 15, paddingTop: Platform.OS === 'android' ? 30 : 0 },
+  mainContainer: { flex: 1, backgroundColor: '#121212' },
+  headerContainer: { backgroundColor: '#121212', paddingBottom: 15, paddingTop: Platform.OS === 'android' ? 30 : 0 },
   headerContent: { alignItems: 'center', marginTop: 10 },
-  headerTitle: { fontSize: 24, fontWeight: 'bold', color: COLORS.textLight },
+  headerTitle: { fontSize: 24, fontWeight: 'bold', color: '#FFF' },
   categoryContainer: { marginVertical: 20 },
-  categoryBtn: { paddingHorizontal: 20, paddingVertical: 10, backgroundColor: '#FFF', borderRadius: 20, marginRight: 10, borderWidth: 1, borderColor: '#E0E0E0' },
+  categoryBtn: { paddingHorizontal: 20, paddingVertical: 10, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 20, marginRight: 10, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' },
   categoryBtnActive: { backgroundColor: COLORS.accentOrange, borderColor: COLORS.accentOrange },
-  categoryText: { fontWeight: '600', color: COLORS.textDark },
+  categoryText: { fontWeight: '600', color: '#FFF' },
   categoryTextActive: { color: '#FFF' },
   listContent: { paddingHorizontal: 20, paddingBottom: 100 },
-  card: { width: '48%', backgroundColor: '#FFF', borderRadius: 15, marginBottom: 20, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
+  card: { width: '48%', backgroundColor: '#1A1A1A', borderRadius: 15, marginBottom: 20, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
   cardImage: { width: '100%', height: 140, borderTopLeftRadius: 15, borderTopRightRadius: 15 },
   heartIcon: { position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(0,0,0,0.3)', padding: 5, borderRadius: 20 },
   cardContent: { padding: 10 },
-  cardTitle: { fontSize: 16, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 5 },
+  cardTitle: { fontSize: 16, fontWeight: 'bold', color: '#FFF', marginBottom: 5 },
   ratingContainer: { flexDirection: 'row', alignItems: 'center' },
-  ratingText: { fontSize: 10, color: COLORS.gray, marginLeft: 5 },
+  ratingText: { fontSize: 10, color: '#CCC', marginLeft: 5 },
   
   // Modal Styles
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },

@@ -170,7 +170,7 @@ export default function MealPlansScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" />
       
       {/* HEADER */}
       <View style={styles.header}>
@@ -239,26 +239,26 @@ export default function MealPlansScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.backgroundBg },
-  
+  container: { flex: 1, backgroundColor: '#121212' },
+
   // Header
-  header: { padding: 20, paddingTop: Platform.OS === 'android' ? 40 : 20, backgroundColor: '#FFF' },
-  headerTitle: { fontSize: 28, fontWeight: 'bold', color: COLORS.textDark },
-  headerSubtitle: { fontSize: 14, color: COLORS.gray, marginTop: 5 },
+  header: { padding: 20, paddingTop: Platform.OS === 'android' ? 40 : 20, backgroundColor: '#121212' },
+  headerTitle: { fontSize: 28, fontWeight: 'bold', color: '#FFF' },
+  headerSubtitle: { fontSize: 14, color: '#CCC', marginTop: 5 },
 
   // Calendar
   calendarContainer: { marginVertical: 10, paddingBottom: 10 },
   dateBox: {
-    width: 60, height: 80, 
-    borderRadius: 18, backgroundColor: '#FFF', 
-    justifyContent: 'center', alignItems: 'center', 
+    width: 60, height: 80,
+    borderRadius: 18, backgroundColor: '#1A1A1A',
+    justifyContent: 'center', alignItems: 'center',
     marginRight: 10,
-    borderWidth: 1, borderColor: '#F0F0F0',
+    borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)',
     elevation: 2, shadowColor: "#000", shadowOpacity: 0.05
   },
   dateBoxActive: { backgroundColor: COLORS.primaryGreen, borderColor: COLORS.primaryGreen },
-  dayName: { fontSize: 14, color: COLORS.gray, marginBottom: 5 },
-  dayNumber: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark },
+  dayName: { fontSize: 14, color: '#CCC', marginBottom: 5 },
+  dayNumber: { fontSize: 18, fontWeight: 'bold', color: '#FFF' },
   textActive: { color: '#FFF' },
   dotIndicator: { width: 5, height: 5, borderRadius: 2.5, backgroundColor: '#FFF', marginTop: 5 },
 
@@ -266,31 +266,31 @@ const styles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 20, paddingBottom: 50 },
   sectionContainer: { marginBottom: 25 },
   sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  sectionTitle: { fontSize: 20, fontWeight: 'bold', color: COLORS.textDark },
-  emptyText: { fontStyle: 'italic', color: '#ccc', marginLeft: 10 },
+  sectionTitle: { fontSize: 20, fontWeight: 'bold', color: '#FFF' },
+  emptyText: { fontStyle: 'italic', color: '#CCC', marginLeft: 10 },
 
   // Meal Card
   mealCard: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    backgroundColor: '#FFF', padding: 15, borderRadius: 12, marginBottom: 10,
+    backgroundColor: '#1A1A1A', padding: 15, borderRadius: 12, marginBottom: 10,
     shadowColor: "#000", shadowOpacity: 0.03, elevation: 1
   },
   mealLeft: { flexDirection: 'row', alignItems: 'center' },
   mealDot: { width: 10, height: 10, borderRadius: 5, backgroundColor: COLORS.accentOrange, marginRight: 10 },
-  mealName: { fontSize: 16, color: COLORS.textDark, fontWeight: '500' },
+  mealName: { fontSize: 16, color: '#FFF', fontWeight: '500' },
 
   // Modal
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 },
-  modalContent: { backgroundColor: '#FFF', borderRadius: 20, padding: 25, elevation: 5 },
-  modalTitle: { fontSize: 22, fontWeight: 'bold', color: COLORS.textDark, marginBottom: 20, textAlign: 'center' },
+  modalContent: { backgroundColor: '#1A1A1A', borderRadius: 20, padding: 25, elevation: 5 },
+  modalTitle: { fontSize: 22, fontWeight: 'bold', color: '#FFF', marginBottom: 20, textAlign: 'center' },
   input: {
-    backgroundColor: '#F5F5F5', borderRadius: 10, padding: 15, fontSize: 16, 
-    color: COLORS.textDark, marginBottom: 25
+    backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: 15, fontSize: 16,
+    color: '#FFF', marginBottom: 25
   },
   modalButtons: { flexDirection: 'row', justifyContent: 'space-between' },
   btn: { flex: 1, padding: 15, borderRadius: 10, alignItems: 'center' },
-  btnCancel: { backgroundColor: '#F5F5F5', marginRight: 10 },
+  btnCancel: { backgroundColor: 'rgba(255,255,255,0.1)', marginRight: 10 },
   btnSave: { backgroundColor: COLORS.primaryGreen, marginLeft: 10 },
-  btnTextCancel: { color: COLORS.gray, fontWeight: 'bold' },
+  btnTextCancel: { color: '#CCC', fontWeight: 'bold' },
   btnTextSave: { color: '#FFF', fontWeight: 'bold' }
 });

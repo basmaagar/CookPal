@@ -1,10 +1,11 @@
 import React, { useContext } from 'react';
-import { 
-  View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, StatusBar 
+import {
+  View, Text, StyleSheet, TouchableOpacity, ScrollView, StatusBar
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import COLORS from '../constants/colors';
-import { AuthContext } from '../context/AuthContext'; 
+import { AuthContext } from '../context/AuthContext';
 
 export default function ProfileScreen() {
   const { user, logout } = useContext(AuthContext);
@@ -23,7 +24,7 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="light-content" />
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* --- HEADER PROFILE (No Photo) --- */}
@@ -74,37 +75,37 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.backgroundBg },
+  container: { flex: 1, backgroundColor: '#121212' },
   scrollContainer: { paddingBottom: 30 },
-  
+
   // Header Styles (Updated)
   profileHeader: { alignItems: 'center', marginTop: 40, marginBottom: 30 },
-  
+
   // New Circle with Initials (Replaces Photo)
   initialsCircle: {
     width: 80, height: 80, borderRadius: 40,
-    backgroundColor: COLORS.primaryGreen,
+    backgroundColor: 'rgba(76,175,80,0.2)',
     justifyContent: 'center', alignItems: 'center',
     marginBottom: 10,
     shadowColor: COLORS.primaryGreen, shadowOpacity: 0.3, shadowRadius: 5, elevation: 5
   },
   initialsText: { fontSize: 32, fontWeight: 'bold', color: '#FFF' },
 
-  userName: { fontSize: 24, fontWeight: 'bold', color: COLORS.textDark },
-  userHandle: { fontSize: 14, color: COLORS.gray, marginTop: 5 },
+  userName: { fontSize: 24, fontWeight: 'bold', color: '#FFF' },
+  userHandle: { fontSize: 14, color: '#CCC', marginTop: 5 },
 
   // Stats
-  statsContainer: { flexDirection: 'row', backgroundColor: '#FFF', marginHorizontal: 20, borderRadius: 15, paddingVertical: 15, justifyContent: 'space-around', marginBottom: 25, shadowColor: "#000", shadowOpacity: 0.05, elevation: 2 },
+  statsContainer: { flexDirection: 'row', backgroundColor: '#1A1A1A', marginHorizontal: 20, borderRadius: 15, paddingVertical: 15, justifyContent: 'space-around', marginBottom: 25, shadowColor: "#000", shadowOpacity: 0.05, elevation: 2 },
   statBox: { alignItems: 'center', flex: 1 },
-  statBorder: { borderLeftWidth: 1, borderRightWidth: 1, borderColor: '#F0F0F0' },
-  statNumber: { fontSize: 18, fontWeight: 'bold', color: COLORS.textDark },
-  statLabel: { fontSize: 12, color: COLORS.gray, marginTop: 2 },
-  
+  statBorder: { borderLeftWidth: 1, borderRightWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  statNumber: { fontSize: 18, fontWeight: 'bold', color: '#FFF' },
+  statLabel: { fontSize: 12, color: '#CCC', marginTop: 2 },
+
   // Menus
   section: { paddingHorizontal: 20, marginBottom: 20 },
-  sectionTitle: { fontSize: 16, fontWeight: 'bold', color: COLORS.gray, marginBottom: 10, marginLeft: 5 },
-  optionItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#FFF', padding: 15, borderRadius: 12, marginBottom: 10, shadowColor: "#000", shadowOpacity: 0.03, elevation: 1 },
+  sectionTitle: { fontSize: 16, fontWeight: 'bold', color: '#CCC', marginBottom: 10, marginLeft: 5 },
+  optionItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#1A1A1A', padding: 15, borderRadius: 12, marginBottom: 10, shadowColor: "#000", shadowOpacity: 0.03, elevation: 1 },
   optionLeft: { flexDirection: 'row', alignItems: 'center' },
-  iconBox: { width: 35, height: 35, backgroundColor: '#E8F5E9', borderRadius: 8, justifyContent: 'center', alignItems: 'center', marginRight: 15 },
-  optionText: { fontSize: 16, color: COLORS.textDark, fontWeight: '500' }
+  iconBox: { width: 35, height: 35, backgroundColor: 'rgba(76,175,80,0.2)', borderRadius: 8, justifyContent: 'center', alignItems: 'center', marginRight: 15 },
+  optionText: { fontSize: 16, color: '#FFF', fontWeight: '500' }
 });
