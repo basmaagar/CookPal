@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { StatusBar, ActivityIndicator, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 
 // Imports
@@ -10,6 +11,7 @@ import RecipesScreen from './src/screens/RecipesScreen';
 import MealPlansScreen from './src/screens/MealPlansScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import LoginScreen from './src/screens/LoginScreen'; // <--- Import Login
+import SignUpScreen from './src/screens/SignUpScreen'; // <--- Import SignUp
 
 // Contexts
 import { FavoritesProvider } from './src/context/FavoritesContext';
@@ -17,6 +19,15 @@ import { AuthProvider, AuthContext } from './src/context/AuthContext'; // <--- I
 import COLORS from './src/constants/colors';
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
+
+// Auth Stack for Login and SignUp
+const AuthStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="Login" component={LoginScreen} />
+    <Stack.Screen name="SignUp" component={SignUpScreen} />
+  </Stack.Navigator>
+);
 
 // Create a Component for the Tab Navigation (The "Main App")
 const MainAppTabs = () => (
@@ -58,7 +69,7 @@ const RootNavigator = () => {
 
   return (
     <NavigationContainer>
-      {user ? <MainAppTabs /> : <LoginScreen />}
+      {user ? <MainAppTabs /> : <AuthStack />}
     </NavigationContainer>
   );
 };
