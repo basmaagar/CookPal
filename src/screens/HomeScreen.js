@@ -1,8 +1,8 @@
-import React, { useState, useContext, useRef, useEffect } from 'react';
+import React, { useState, useContext, useRef, useEffect, useMemo } from 'react';
 import {
   StyleSheet, Text, View, TextInput, TouchableOpacity,
-  Keyboard, Animated, ScrollView, SafeAreaView, StatusBar, 
-  Platform, Alert, ActivityIndicator, Image, Dimensions
+  Keyboard, Animated, ScrollView, StatusBar,
+  Alert, ActivityIndicator, Image, Dimensions, Modal
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import COLORS from '../constants/colors';
@@ -19,51 +19,68 @@ const CAROUSEL_IMAGES = [
 ];
 
 export default function HomeScreen() {
-  const [searchMode, setSearchMode] = useState(null); 
-  const [query, setQuery] = useState('');
-  const [ingredient, setIngredient] = useState('');
+  const [searchMode, setSearchMode] = useState(null); // 'recipe' | 'ingredients' | null
+  const [inputs, setInputs] = useState({ query: '', ingredient: '' });
   const [myIngredients, setMyIngredients] = useState([]);
   const [recipes, setRecipes] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState({ list: false, details: false });
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
 
   const scrollY = useRef(new Animated.Value(0)).current;
   const { favorites, toggleFavorite } = useContext(FavoritesContext);
 
+  // --- EFFETS ---
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentImgIndex((prev) => (prev + 1) % CAROUSEL_IMAGES.length);
+      setCurrentImgIndex(prev => (prev + 1) % CAROUSEL_IMAGES.length);
     }, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  // --- API LOGIC (Unchanged) ---
-  const searchByName = async () => {
-    if (!query.trim()) return;
-    setLoading(true);
+  // --- LOGIQUE API ---
+  const apiCall = async (url, target = 'list') => {
+    setLoading(prev => ({ ...prev, [target === 'list' ? 'list' : 'details']: true }));
     try {
-      const response = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${query}`);
+      const response = await fetch(url);
       const data = await response.json();
-      setRecipes(data.meals || []);
-    } finally { setLoading(false); Keyboard.dismiss(); }
+      return data.meals || [];
+    } catch (e) {
+      Alert.alert('Erreur', 'Connexion au serveur impossible');
+      return [];
+    } finally {
+      setLoading(prev => ({ ...prev, [target === 'list' ? 'list' : 'details']: false }));
+      Keyboard.dismiss();
+    }
   };
 
-  const searchByIngredients = async () => {
-    if (myIngredients.length === 0) return;
-    setLoading(true);
-    try {
-      const response = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?i=${myIngredients[0]}`);
-      const data = await response.json();
-      setRecipes(data.meals || []);
-    } finally { setLoading(false); }
+  const handleSearch = async () => {
+    if (searchMode === 'recipe') {
+      if (!inputs.query.trim()) return;
+      const res = await apiCall(`https://www.themealdb.com/api/json/v1/1/search.php?s=${inputs.query}`);
+      setRecipes(res);
+    } else {
+      if (myIngredients.length === 0) return;
+      const res = await apiCall(`https://www.themealdb.com/api/json/v1/1/filter.php?i=${myIngredients[0]}`);
+      setRecipes(res);
+    }
   };
 
   const addIngredient = () => {
-    if (ingredient.trim() && !myIngredients.includes(ingredient.trim())) {
-      setMyIngredients([...myIngredients, ingredient.trim()]);
-      setIngredient('');
+    if (inputs.ingredient.trim() && !myIngredients.includes(inputs.ingredient.trim())) {
+      setMyIngredients([...myIngredients, inputs.ingredient.trim()]);
+      setInputs(prev => ({ ...prev, ingredient: '' }));
     }
   };
+
+  const showDetails = async (id) => {
+    setSelectedRecipe(null);
+    const res = await apiCall(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`, 'details');
+    if (res.length) setSelectedRecipe(res[0]);
+  };
+
+  // --- RENDER HELPERS ---
+  const isFav = (id) => favorites.some(f => f.idMeal === id);
 
   return (
     <View style={styles.mainContainer}>
@@ -71,10 +88,7 @@ export default function HomeScreen() {
 
       <Animated.ScrollView
         onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
-        scrollEventThrottle={16}
-        snapToInterval={SCREEN_HEIGHT}
-        decelerationRate="fast"
-        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16} snapToInterval={SCREEN_HEIGHT} decelerationRate="fast"
       >
         {/* SECTION 1: HERO */}
         <View style={styles.heroContainer}>
@@ -86,86 +100,67 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* SECTION 2: CHOOSE YOUR PATH (GRADIENT/SMOOTH TRANSITION) */}
+        {/* SECTION 2: CONTENT */}
         <View style={styles.choiceSectionContainer}>
-          {/* We use a background color that matches the carousel overlay (dark) */}
-          <View style={styles.darkBackgroundFill} />
-          
           {!searchMode ? (
             <View style={styles.centeredWrapper}>
               <Text style={styles.centeredTitle}>Choose your path</Text>
               <View style={styles.choiceRow}>
-                <TouchableOpacity style={styles.choiceCard} onPress={() => setSearchMode('recipe')}>
-                  <View style={styles.iconCircle}>
-                    <Ionicons name="restaurant" size={32} color="#FFF" />
-                  </View>
-                  <Text style={styles.choiceText}>Search by{"\n"}Recipe Name</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.choiceCard} onPress={() => setSearchMode('ingredients')}>
-                  <View style={styles.iconCircle}>
-                    <Ionicons name="basket" size={32} color="#FFF" />
-                  </View>
-                  <Text style={styles.choiceText}>Search by{"\n"}Ingredients</Text>
-                </TouchableOpacity>
+                <MenuCard icon="restaurant" label="Recipe Name" onPress={() => setSearchMode('recipe')} />
+                <MenuCard icon="basket" label="Ingredients" onPress={() => setSearchMode('ingredients')} />
               </View>
             </View>
           ) : (
-            /* SEARCH ACTIVE AREA */
             <View style={styles.searchActiveContent}>
-              <TouchableOpacity onPress={() => {setSearchMode(null); setRecipes([]);}} style={styles.backBtn}>
+              <TouchableOpacity onPress={() => { setSearchMode(null); setRecipes([]); }} style={styles.backBtn}>
                 <Ionicons name="arrow-back" size={20} color="#FFF" />
-                <Text style={{color: '#FFF', marginLeft: 5}}>Change Mode</Text>
+                <Text style={{ color: '#FFF', marginLeft: 5 }}>Back</Text>
               </TouchableOpacity>
 
               <View style={styles.searchBox}>
-                <TextInput 
-                  style={styles.input} 
+                <TextInput
+                  style={styles.input}
                   placeholder={searchMode === 'recipe' ? "Search recipe..." : "Add ingredient..."}
                   placeholderTextColor="#999"
-                  value={searchMode === 'recipe' ? query : ingredient}
-                  onChangeText={searchMode === 'recipe' ? setQuery : setIngredient}
-                  onSubmitEditing={searchMode === 'recipe' ? searchByName : addIngredient}
+                  value={searchMode === 'recipe' ? inputs.query : inputs.ingredient}
+                  onChangeText={(val) => setInputs(prev => ({ ...prev, [searchMode === 'recipe' ? 'query' : 'ingredient']: val }))}
+                  onSubmitEditing={searchMode === 'recipe' ? handleSearch : addIngredient}
                 />
-                <TouchableOpacity style={styles.actionBtn} onPress={searchMode === 'recipe' ? searchByName : addIngredient}>
-                  <Ionicons name={searchMode === 'recipe' ? "search" : "add"} size={20} color="#FFF" />
+                <TouchableOpacity style={styles.actionBtn} onPress={searchMode === 'recipe' ? handleSearch : addIngredient}>
+                  <Ionicons name={searchMode === 'recipe' ? "search" : "add"} size={20} color="#b51919" />
                 </TouchableOpacity>
               </View>
 
-              {/* Ingredients Chips */}
               {searchMode === 'ingredients' && (
                 <View style={styles.chipsContainer}>
-                    {myIngredients.map((item, i) => (
-                      <View key={i} style={styles.chip}>
-                        <Text style={{color: '#FFF'}}>{item}</Text>
-                        <TouchableOpacity onPress={() => setMyIngredients(myIngredients.filter((_, idx) => idx !== i))}>
-                           <Ionicons name="close-circle" size={16} color="#FFF" style={{marginLeft: 5}}/>
-                        </TouchableOpacity>
-                      </View>
-                    ))}
-                    {myIngredients.length > 0 && (
-                        <TouchableOpacity style={styles.miniFindBtn} onPress={searchByIngredients}>
-                            <Text style={{color: '#FFF', fontWeight: 'bold'}}>Search</Text>
-                        </TouchableOpacity>
-                    )}
+                  {myIngredients.map((item, i) => (
+                    <View key={i} style={styles.chip}>
+                      <Text style={{ color: '#FFF' }}>{item}</Text>
+                      <TouchableOpacity onPress={() => setMyIngredients(myIngredients.filter((_, idx) => idx !== i))}>
+                        <Ionicons name="close-circle" size={16} color="#FFF" style={{ marginLeft: 5 }} />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                  {myIngredients.length > 0 && (
+                    <TouchableOpacity style={styles.miniFindBtn} onPress={handleSearch}>
+                      <Text style={{ fontWeight: 'bold' }}>Search</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               )}
 
-              {/* RESULTS */}
-              {loading ? (
-                <ActivityIndicator size="large" color="#FFF" style={{marginTop: 50}} />
+              {loading.list ? (
+                <ActivityIndicator size="large" color="#FFF" style={{ marginTop: 50 }} />
               ) : (
                 <View style={styles.resultsList}>
                   {recipes.map((recipe) => (
-                    <View key={recipe.idMeal} style={styles.card}>
-                      <Image source={{ uri: recipe.strMealThumb }} style={styles.cardImage} />
-                      <View style={styles.cardInfo}>
-                        <Text style={styles.cardTitle}>{recipe.strMeal}</Text>
-                        <TouchableOpacity onPress={() => toggleFavorite(recipe)}>
-                           <Ionicons name={favorites.some(f => f.idMeal === recipe.idMeal) ? "heart" : "heart-outline"} size={26} color="#FF4B4B" />
-                        </TouchableOpacity>
-                      </View>
-                    </View>
+                    <RecipeCard 
+                        key={recipe.idMeal} 
+                        recipe={recipe} 
+                        onPress={() => showDetails(recipe.idMeal)} 
+                        isFavorite={isFav(recipe.idMeal)}
+                        onToggleFav={() => toggleFavorite(recipe)}
+                    />
                   ))}
                 </View>
               )}
@@ -173,9 +168,60 @@ export default function HomeScreen() {
           )}
         </View>
       </Animated.ScrollView>
+
+      <RecipeModal 
+        visible={!!selectedRecipe || loading.details} 
+        recipe={selectedRecipe} 
+        loading={loading.details} 
+        onClose={() => setSelectedRecipe(null)} 
+      />
     </View>
   );
 }
+
+// --- SOUS-COMPOSANTS ---
+
+const MenuCard = ({ icon, label, onPress }) => (
+  <TouchableOpacity style={styles.choiceCard} onPress={onPress}>
+    <View style={styles.iconCircle}><Ionicons name={icon} size={32} color="#FFF" /></View>
+    <Text style={styles.choiceText}>Search by{"\n"}{label}</Text>
+  </TouchableOpacity>
+);
+
+const RecipeCard = ({ recipe, onPress, isFavorite, onToggleFav }) => (
+  <TouchableOpacity style={styles.card} onPress={onPress}>
+    <Image source={{ uri: recipe.strMealThumb }} style={styles.cardImage} />
+    <View style={styles.cardInfo}>
+      <Text style={styles.cardTitle}>{recipe.strMeal}</Text>
+      <TouchableOpacity onPress={onToggleFav}>
+        <Ionicons name={isFavorite ? "heart" : "heart-outline"} size={26} color="#FF4B4B" />
+      </TouchableOpacity>
+    </View>
+  </TouchableOpacity>
+);
+
+const RecipeModal = ({ visible, recipe, loading, onClose }) => (
+  <Modal animationType="slide" transparent visible={visible} onRequestClose={onClose}>
+    <View style={styles.modalOverlay}>
+      <View style={styles.modalContent}>
+        {loading ? (
+          <ActivityIndicator size="large" color="#4CAF50" />
+        ) : recipe && (
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <Image source={{ uri: recipe.strMealThumb }} style={styles.modalImage} />
+            <Text style={styles.modalTitle}>{recipe.strMeal}</Text>
+            <Text style={styles.sectionHeader}>Instructions</Text>
+            <Text style={styles.instructions}>{recipe.strInstructions}</Text>
+            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        )}
+      </View>
+    </View>
+  </Modal>
+);
+
 
 const styles = StyleSheet.create({
   mainContainer: { flex: 1, backgroundColor: '#121212' }, // Dark base
@@ -232,7 +278,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.2)'
   },
   input: { flex: 1, padding: 15, color: '#FFF', fontSize: 16 },
-  actionBtn: { backgroundColor: COLORS.primaryGreen || '#4CAF50', padding: 15, borderRadius: 15 },
+  actionBtn: { padding: 15, borderRadius: 15 },
   
   chipsContainer: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 15, alignItems: 'center' },
   chip: { backgroundColor: 'rgba(255,255,255,0.15)', flexDirection: 'row', padding: 10, borderRadius: 20, marginRight: 8, marginBottom: 8 },
@@ -242,5 +288,15 @@ const styles = StyleSheet.create({
   card: { backgroundColor: '#252525', borderRadius: 25, marginBottom: 20, overflow: 'hidden' },
   cardImage: { width: '100%', height: 220 },
   cardInfo: { padding: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cardTitle: { fontSize: 18, fontWeight: 'bold', color: '#FFF', flex: 1 }
+  cardTitle: { fontSize: 18, fontWeight: 'bold', color: '#FFF', flex: 1 },
+
+  // Modal styles
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
+  modalContent: { backgroundColor: '#FFF', borderRadius: 20, padding: 20, width: '90%', maxHeight: '80%' },
+  modalImage: { width: '100%', height: 200, borderRadius: 10, marginBottom: 15 },
+  modalTitle: { fontSize: 24, fontWeight: 'bold', color: '#333', marginBottom: 15, textAlign: 'center' },
+  sectionHeader: { fontSize: 20, fontWeight: 'bold', color: '#333', marginBottom: 10 },
+  instructions: { fontSize: 16, color: '#666', lineHeight: 24, marginBottom: 20 },
+  closeButton: { backgroundColor: COLORS.primaryGreen || '#4CAF50', padding: 15, borderRadius: 10, alignItems: 'center' },
+  closeButtonText: { color: '#FFF', fontSize: 16, fontWeight: 'bold' }
 });

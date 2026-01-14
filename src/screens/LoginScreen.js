@@ -42,8 +42,6 @@ export default function LoginScreen({ navigation }) {
 
         {/* FORM */}
         <View style={styles.form}>
-
-          {/* EMAIL INPUT */}
           <View style={styles.inputContainer}>
             <Ionicons name="mail-outline" size={20} color={COLORS.gray} style={styles.inputIcon} />
             <TextInput
@@ -74,7 +72,6 @@ export default function LoginScreen({ navigation }) {
             <Text style={styles.forgotText}>Forgot Password?</Text>
           </TouchableOpacity>
 
-          {/* LOGIN BUTTON */}
           <TouchableOpacity
             style={styles.loginButton}
             onPress={handleLogin}
